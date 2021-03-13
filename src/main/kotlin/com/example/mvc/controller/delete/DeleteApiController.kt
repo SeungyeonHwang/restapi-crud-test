@@ -6,6 +6,10 @@ import javax.validation.constraints.Min
 import javax.validation.constraints.NotNull
 import javax.validation.constraints.Size
 
+// https://beanvalidation.org/2.0-jsr380/spec/
+// JSR-320
+// hibernate Validation
+// Spring boot Validation
 @RestController
 @RequestMapping("/api")
 @Validated //_age는 Bean이 아니기 때문에 어노테이션 필요
@@ -34,7 +38,7 @@ class DeleteApiController {
     @DeleteMapping(path = ["/delete-mapping/name/{name}/age/{age}"])
     fun deleteMappingPath(
         @PathVariable(value = "name")
-        @Size(min = 2, max = 5)
+        @Size(min = 2, max = 5, message = "name의 길이는 2~5")
         @NotNull
         _name: String, // aa ~ aaaaa
 
