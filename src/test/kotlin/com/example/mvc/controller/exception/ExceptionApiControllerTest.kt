@@ -1,11 +1,14 @@
 package com.example.mvc.controller.exception
 
+import com.example.mvc.model.http.UserRequest
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
@@ -23,7 +26,7 @@ class ExceptionApiControllerTest {
         mockMvc.perform(
             get("/api/exception/hello")
         ).andExpect(
-            status().`is`(400)
+            status().`is`(200)
         ).andExpect(
             content().string("hello")
         ).andDo(print())
@@ -31,9 +34,9 @@ class ExceptionApiControllerTest {
 
     @Test
     fun getTest() {
-        val queryParams = LinkedMultiValueMap<String,String>()  // Key, Value
-        queryParams.add("name","steve")
-        queryParams.add("age","20")
+        val queryParams = LinkedMultiValueMap<String, String>()  // Key, Value
+        queryParams.add("name", "steve")
+        queryParams.add("age", "20")
 
         mockMvc.perform(
             get("/api/exception").queryParams(queryParams)
@@ -45,10 +48,10 @@ class ExceptionApiControllerTest {
     }
 
     @Test
-    fun getFailTest(){
-        val queryParams = LinkedMultiValueMap<String,String>()  // Key, Value
-        queryParams.add("name","steve")
-        queryParams.add("age","9")
+    fun getFailTest() {
+        val queryParams = LinkedMultiValueMap<String, String>()  // Key, Value
+        queryParams.add("name", "steve")
+        queryParams.add("age", "9")
 
         mockMvc.perform(
             get("/api/exception").queryParams(queryParams)
@@ -65,5 +68,67 @@ class ExceptionApiControllerTest {
         ).andDo(print())
     }
 
-    //POST
+    //Post_Test
+    @Test
+    fun postTest() {
+
+        //Json 일일이 써주는것은 힘들기 때문에 ObjectMapper 사용
+        val userRequest = UserRequest().apply {
+            this.name = "steve"
+            this.age = 10
+            this.phoneNumber = "010-1111-2222"
+            this.address = "경기도 성남시"
+            this.email = "steve@gmail.com"
+            this.createdAt = "2020-10-21 13:00:00"
+        }
+
+        //json 변환
+        val json = jacksonObjectMapper().writeValueAsString(userRequest)
+        println(json)
+
+        mockMvc.perform(
+            post("/api/exception")
+                .content(json)
+                .contentType("application/json")
+                .accept("application/json")
+        ).andExpect(
+            status().isOk
+        ).andExpect(
+            jsonPath("\$.name").value("steve")
+        ).andExpect(
+            jsonPath("\$.age").value("10")
+        ).andExpect(
+            jsonPath("\$.email").value("steve@gmail.com")
+        ).andExpect(
+            jsonPath("\$.address").value("경기도 성남시")
+        ).andDo(print())
+
+    }
+
+    @Test
+    fun postFailTest() {
+
+        //Json 일일이 써주는것은 힘들기 때문에 ObjectMapper 사용
+        val userRequest = UserRequest().apply {
+            this.name = "steve"
+            this.age = -1
+            this.phoneNumber = "010-1111-2222"
+            this.address = "경기도 성남시"
+            this.email = "steve@gmail.com"
+            this.createdAt = "2020-10-21 13:00:00"
+        }
+
+        //json 변환
+        val json = jacksonObjectMapper().writeValueAsString(userRequest)
+        println(json)
+
+        mockMvc.perform(
+            post("/api/exception")  //put도 있다.
+                .content(json)
+                .contentType("application/json")
+                .accept("application/json")
+        ).andExpect(
+            status().`is`(400)
+        ).andDo(print())
+    }
 }
